@@ -1,0 +1,23 @@
+# Exclude third-party cloned repositories, cached literature PDFs, and large binary checkpoints
+egomotion-registration/repos/
+egomotion-registration/papers/
+egomotion-registration/outputs/ego_anchor_net/*.pth
+egomotion-registration/validation_pack.zip
+image-to-physics-sim/repos/
+image-to-physics-sim/papers/
+
+# LaTeX build intermediates
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# Python / OS caches
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

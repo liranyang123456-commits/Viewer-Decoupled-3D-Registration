@@ -1,0 +1,66 @@
+{
+  "role": "same camera trajectory; target either frozen or moving on its own",
+  "tau_s": 0.06,
+  "seed": 11,
+  "motion": "aggressive_6dof",
+  "width": 1280,
+  "height": 720,
+  "camera_path_identical": true,
+  "target_does_not_change_camera": true,
+  "conditions": [
+    {
+      "name": "target_moving",
+      "n": 231,
+      "camera_omega_p50_rad_s": 2.7237,
+      "camera_omega_p95_rad_s": 4.7851,
+      "target_omega_p50_rad_s": 0.6639,
+      "target_omega_p95_rad_s": 1.3942,
+      "target_speed_p95_mm_s": 79.089,
+      "corr_camera_omega_vs_stale_camera": 0.4114,
+      "corr_target_omega_vs_stale_target": 0.1283,
+      "corr_target_speed_vs_stale_target": 0.6823,
+      "camera_omega_quintile_stale_camera": {
+        "slow_score_mean": 1.4358,
+        "fast_score_mean": 4.4431,
+        "slow_value_px": 155.753,
+        "fast_value_px": 449.524
+      },
+      "target_omega_quintile_stale_target": {
+        "slow_score_mean": 0.2389,
+        "fast_score_mean": 1.3564,
+        "slow_value_px": 19.435,
+        "fast_value_px": 25.216
+      },
+      "mean_stale_camera_px": 247.266,
+      "mean_stale_target_px": 22.423,
+      "mean_stale_both_px": 242.752
+    },
+    {
+      "name": "target_fixed",
+      "n": 231,
+      "camera_omega_p50_rad_s": 2.7237,
+      "camera_omega_p95_rad_s": 4.7851,
+      "target_omega_p50_rad_s": 0.0,
+      "target_omega_p95_rad_s": 0.0,
+      "target_speed_p95_mm_s": 0.0,
+      "corr_camera_omega_vs_stale_camera": 0.3693,
+      "corr_target_omega_vs_stale_target": null,
+      "corr_target_speed_vs_stale_target": null,
+      "camera_omega_quintile_stale_camera": {
+        "slow_score_mean": 1.4358,
+        "fast_score_mean": 4.4431,
+        "slow_value_px": 188.665,
+        "fast_value_px": 403.165
+      },
+      "target_omega_quintile_stale_target": {
+        "slow_score_mean": 0.0,
+        "fast_score_mean": 0.0,
+        "slow_value_px": 0.0,
+        "fast_value_px": 0.0
+      },
+      "mean_stale_camera_px": 251.066,
+      "mean_stale_target_px": 0.0,
+      "mean_stale_both_px": 251.066
+    }
+  ]
+}
