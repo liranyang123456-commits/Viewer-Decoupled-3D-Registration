@@ -239,12 +239,18 @@ and the display overlay pose is composed as
 \hat{T}_{cm}(t_d) = \hat{T}_{cw}(t_d)\,\bar{T}_{wm}(t_e).
 \label{eq:render_pose}
 \end{equation}
+For high-resolution rolling-shutter CMOS sensors (such as our $3840\times2160$ 4K camera with active line readout time $\tau_{\text{read}} = 15.0$~ms), scanline $y \in [0, H-1]$ is exposed at timestamp
+\begin{equation}
+t_e(y) = t_e + \tau_{\text{read}}\!\left(\frac{y}{H} - \frac{1}{2}\right).
+\label{eq:row_time}
+\end{equation}
+Applying a single frame-midpoint rotation across all scanlines leaves a residual inter-band rolling-shutter skew of magnitude up to $\frac{1}{2}f\|\boldsymbol{\omega}\|\tau_{\text{read}}$ between the top and bottom image bands during rapid turns. Replacing $t_e$ in Eq.~\eqref{eq:viewer_prop} with the row-specific timestamp $t_e(y)$ integrates the $200$~Hz gyroscope over $[t_e(y), t_d]$ per scanline band, eliminating intra-frame rolling-shutter skew at display time.
 
 \section{Experimental Setup and Hybrid Dataset}
 \subsection{Hardware Platforms and Hybrid R2S Dual-Motion Corpus}
 We evaluate two physical camera-IMU configurations and a hybrid dual-motion benchmark:
 \begin{enumerate}
-    \item \textbf{Device A (4K Camera + IMU):} A monocular 4K camera ($3840\times2160$ sensor output; intrinsics scaled to $1280\times720$, $512\times288$, and $320\times256$ for registration inference) rigidly mounted with a $200$~Hz 6-axis USB IMU. The camera-to-IMU rotation $R_{ci}$ is calibrated via rigid hand-eye alignment:
+    \item \textbf{Device A (4K Rolling-Shutter Camera + IMU):} A monocular 4K CMOS camera ($3840\times2160$, calibrated intrinsics $f_x = 3799.19$~px, $f_y = 3796.09$~px, $c_x = 1844.58$~px, $c_y = 1082.58$~px, reprojection RMS $0.775$~px across $120$ views; downsampled to $1280\times720$, $512\times288$, and $320\times256$ for network inference) rigidly paired with a $200$~Hz 6-axis USB IMU (USB stream delay $\tau_{\text{usb}} = 150.0$~ms) and a $187$~Hz Bluetooth target-reference IMU. The camera-to-IMU rotation $R_{ci}$ is calibrated via rigid hand-eye alignment:
     \[
     R_{ci} = \begin{bmatrix}
     0.007668 & -0.946526 & -0.322536 \\
@@ -252,8 +258,7 @@ We evaluate two physical camera-IMU configurations and a hybrid dual-motion benc
     0.999966 & 0.008270 & -0.000496
     \end{bmatrix}.
     \]
-    Millimetre error on the monocular 4K setup uses a known target length ($12\times9$ inner grid, $3.0$~mm square size).
-    \item \textbf{Device B (Stereo Endoscope Configuration + IMU):} A stereo endoscopic camera pair ($1280\times720$ per eye, $30$~fps, nominal baseline $b = 46.5$~mm in simulation, to be replaced by wet-lab stereo calibration before clinical use) paired with a $200$~Hz IMU noise model fitted from static USB recordings. Stereo disparity defines metric scale in millimetres, and exposure-midpoint IMU gyroscope readings define $\|\boldsymbol{\omega}\|$.
+    \item \textbf{Device B (Calibrated Stereo Endoscope + IMU):} A dual-channel stereo endoscopic camera rig ($1280\times720$ per eye, $30$~fps, left intrinsics $f_x = 1095.34$~px, $f_y = 1097.58$~px, $c_x = 691.36$~px, $c_y = 383.36$~px, RMS $0.243$~px; right intrinsics $f_x = 1070.21$~px, $f_y = 1061.31$~px, $c_x = 636.32$~px, $c_y = 331.94$~px, RMS $0.284$~px) rigidly bound to the $200$~Hz USB IMU. Because the two UVC camera streams lack a hardware trigger, cross-correlating image-plane target trajectories reveals a sub-frame right-camera lag of $\Delta k = -0.518$~frames (correlation $0.9111$). Jointly fitting the stereo extrinsics $p_{C1} = R_{C1,C0}p_{C0} + \mathbf{t}_{C1,C0}$ over $41$ quasi-static pairs ($\le 4.0$~px inter-frame motion) with sub-frame lag interpolation yields a measured metric baseline of $\|\mathbf{t}_{C1,C0}\| = \mathbf{46.30\text{~mm}}$ ($\mathbf{t}_{C1,C0} = [-46.09, +3.73, -2.45]^\top$~mm, vs.\ $46.50$~mm nominal CAD housing) and an inter-tube optical rotation vector of $\mathbf{r}_{C1,C0} = [-2.07^\circ, -0.49^\circ, +10.18^\circ]^\top$ with a median stereo reprojection RMS of $0.290$~px (overall fit RMS $0.575$~px).
     \item \textbf{Hybrid Dual-Motion + Static-Anchor Corpus:} To train and evaluate EgoAnchorNet with exact pixel-level stationarity labels and independent 6DoF poses for both camera and target, we generate $1{,}125$ dual-motion pairs ($865$ training across $24$ sequences, $260$ validation across $8$ sequences, plus $40$ held-out test pairs across $4$ angular-velocity bins). Half of the sequences texture the stationary background surface with real porcine abdominal cavity keyframes from SCARED~\cite{allan2021scared} (datasets 5--7), while the target object executes independent 6DoF spline trajectories ($\pm 20\text{--}32$~mm translation, $14^\circ\text{--}24^\circ$ rotation, $95$th-percentile speed $79.1$~mm/s) and the camera executes aggressive 6DoF trajectories ($\pm 40$~mm translation, $10^\circ\text{--}24^\circ$ rotation) without tracking the target. Each pair provides exact $32\times 40$ metric depth maps, binary static-anchor masks $\mathcal{M}_{\text{stat}}$, noisy $200$~Hz IMU preintegrated rotations $\Delta R_{\text{imu}}$, and ground-truth $(\Delta R_{\text{cam}}, \Delta\mathbf{t}_{\text{cam}})$ and $(\Delta R_{\text{obj}}, \Delta\mathbf{t}_{\text{obj}})$.
 \end{enumerate}
 
@@ -401,7 +406,7 @@ Fig.~\ref{fig:ego_anchor} and Table~\ref{tab:ego_anchor} evaluate EgoAnchorNet o
 \begin{figure*}[!t]
 \centering
 \includegraphics[width=\textwidth]{fig3_add_and_real_bins.pdf}
-\caption{3D model ADD error, latency sweep, and real 4K+IMU consecutive-frame evaluation. \textbf{(a)} 3D model ADD error (mm) across IMU angular-velocity bins at $\tau = 60$~ms delay ($89$ frames, $\sigma_{\text{px}}=1.2$~px). \textbf{(b)} Rotational overlay drift (px) vs. pipeline delay $\tau$ and angular rate $\|\boldsymbol{\omega}\|$. \textbf{(c)} Consecutive-frame rotation error of Pi3~\cite{wang2025pi3} and Reloc3r~\cite{dong2025reloc3r} on three real 4K+IMU sessions ($48$ pairs, $12$ per bin).}
+\caption{Calibrated stereo 3D triangulation, 4K rolling-shutter row-timed IMU warp, and real 4K+IMU consecutive-frame evaluation. \textbf{(a)} Metric 3D grid shape RMSE (mm) and stereo-vs-monocular PnP 3D ADD discrepancy (mm) across $41$ stereo pairs under nominal CAD baseline ($46.50$~mm, $R=I$), unfiltered asynchronous stereo fit ($55.86$~mm), measured extrinsics without lag compensation ($46.30$~mm), and measured extrinsics with sub-frame lag compensation ($\Delta k = -0.518$~frames). \textbf{(b)} 4K ($3840\times2160$, $\tau_{\text{read}}=15.0$~ms, $\tau=30.0$~ms) top, middle, and bottom band registration shift (px) across IMU angular-velocity bins comparing Frame-Level IMU Warp vs.\ Row-Timed IMU Warp (Eq.~\eqref{eq:row_time}). \textbf{(c)} Consecutive-frame rotation error of Reloc3r~\cite{dong2025reloc3r}, Pi3~\cite{wang2025pi3}, and EgoAnchorNet (Camera) across the four gyro bins.}
 \label{fig:add_real}
 \end{figure*}
 
@@ -409,7 +414,7 @@ Fig.~\ref{fig:ego_anchor} and Table~\ref{tab:ego_anchor} evaluate EgoAnchorNet o
 \centering
 \caption{3D Model Registration Error (ADD in mm and Screen Reprojection in px) at $\tau = 60$~ms Pipeline Delay ($89$ Frames, $30$~fps, $\sigma_{\text{px}}=1.2$~px).}
 \label{tab:add}
-\renewcommand{\arraystretch}{1.15}
+\renewcommand{\arraystretch}{1.12}
 \setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{lcccc}
 \toprule
@@ -423,20 +428,55 @@ Coupled $T_{cm}$ Extrap. & 7.76 mm & 7.82 mm & 5.46 mm & \textbf{1.51} \\
 \end{tabular}
 \end{table}
 
-\subsection{Stage-II Latency Compensation and Real 4K+IMU Sessions}
-Table~\ref{tab:add} and Fig.~\ref{fig:add_real}(a) test our Stage-II display update on a $40$~mm 3D navigation target along an orbit-plus-fast-yaw trajectory ($\tau = 60$~ms, $89$ frames, $30$~fps, $\sigma_{\text{px}}=1.2$~px). Rendering with the exposure-time pose $T_{cm}(t_e)$ increases 3D model ADD from $4.86$~mm at $<0.8$~rad/s to $14.94$~mm at $\ge 1.6$~rad/s. Extrapolating the composite pose $T_{cm}$ lowers 2D reprojection error to $1.51$~px but corrupts 3D model position across all bins ($7.76$~mm slow, $5.46$~mm fast). Decoupling viewer motion keeps 3D ADD at $2.03\text{--}2.19$~mm across all bins with $1.55$~px reprojection error.
+\begin{table}[!t]
+\centering
+\caption{Calibrated Stereo Metric Triangulation ($41$ Pairs) and 4K ($3840\times2160$) Rolling-Shutter Row-Timed vs.\ Frame-Level IMU Warp ($260$ Pairs; Medians Reported).}
+\label{tab:stereo_rs}
+\renewcommand{\arraystretch}{1.12}
+\setlength{\tabcolsep}{2.6pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+\multicolumn{6}{l}{\textbf{Part A: Stereo Extrinsic Calibration \& Metric 3D Triangulation}} \\
+\textbf{Stereo Configuration} & \textbf{Base. (mm)} & \textbf{RMS (px)} & \textbf{Epi.\ Dyn.\ (px)} & \textbf{Shape (mm)} & \textbf{ADD (mm)} \\
+\midrule
+Nominal CAD ($R=I$) & 46.50 & 49.29 & 79.77 & 2.088 & 5.999 \\
+Unfiltered Async (\texttt{m25}) & 55.86 & 9.55 & 10.64 & 0.956 & 7.051 \\
+Measured ($\Delta k = 0$) & 46.30 & 0.293 & 2.573 & 0.090 & 0.356 \\
+\textbf{Measured + Lag ($\Delta k=-0.518$)} & \textbf{46.30} & \textbf{0.290} & \textbf{1.472} & \textbf{0.087} & \textbf{0.355} \\
+\midrule
+\multicolumn{6}{l}{\textbf{Part B: 4K Rolling-Shutter Band Shift (px) \& Inter-Band Skew ($\tau_{\text{read}}=15$~ms)}} \\
+\textbf{Stage-II Mode (Bin)} & \textbf{Top Band} & \textbf{Mid Band} & \textbf{Bot Band} & \textbf{All Med [IQR]} & \textbf{Band Skew} \\
+\midrule
+Uncompensated ($\mathcal{B}_1$) & 54.42 & 52.90 & 55.96 & 53.30 [30.64] & 8.46 \\
+Frame-Level IMU ($\mathcal{B}_1$) & 40.77 & 37.55 & 33.00 & 38.01 [15.82] & 6.51 \\
+\textbf{Row-Timed IMU ($\mathcal{B}_1$)} & \textbf{38.81} & \textbf{37.53} & \textbf{35.41} & \textbf{37.80 [15.54]} & \textbf{5.62} \\
+\cmidrule(lr){1-6}
+Uncompensated ($\mathcal{B}_4$) & 330.37 & 275.27 & 224.26 & 275.47 [108.1] & 107.12 \\
+Frame-Level IMU ($\mathcal{B}_4$) & 57.95 & 34.29 & 53.49 & 47.01 [17.58] & 43.25 \\
+\textbf{Row-Timed IMU ($\mathcal{B}_4$)} & \textbf{35.37} & \textbf{34.00} & \textbf{33.59} & \textbf{34.60 [23.37]} & \textbf{5.08} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
 
-Fig.~\ref{fig:add_real}(c) evaluates consecutive $30$~fps frames from three real 4K camera + $200$~Hz IMU sessions (\texttt{gtraj\_20261002\_002134}, \texttt{003129}, and \texttt{024309}, $48$ pairs, $12$ per gyro bin). Whereas uniform 64-frame subsampling placed $134$ of $189$ pairs into $[2.0,10.0)$~rad/s, consecutive-frame sampling across all four gyro bins shows rotation error rising in $[2.0,10.0)$~rad/s from $0.434^\circ$ to $0.971^\circ$ for Pi3 and from $0.466^\circ$ to $0.627^\circ$ for Reloc3r.
+\subsection{Stage-II Latency Compensation, Calibrated Stereo Triangulation, and 4K Rolling-Shutter Warp}
+Table~\ref{tab:add} tests our Stage-II display update on a $40$~mm 3D navigation target along an orbit-plus-fast-yaw trajectory ($\tau = 60$~ms, $89$ frames, $30$~fps, $\sigma_{\text{px}}=1.2$~px). Rendering with the exposure-time pose $T_{cm}(t_e)$ increases 3D model ADD from $4.86$~mm at $<0.8$~rad/s to $14.94$~mm at $\ge 1.6$~rad/s. Extrapolating the composite pose $T_{cm}$ lowers 2D reprojection error to $1.51$~px but corrupts 3D model position across all bins ($7.76$~mm slow, $5.46$~mm fast). Decoupling viewer motion keeps 3D ADD at $2.03\text{--}2.19$~mm across all bins with $1.55$~px reprojection error.
+
+Table~\ref{tab:stereo_rs} (Part~A) and Fig.~\ref{fig:add_real}(a) verify metric 3D stereo triangulation on the dual-channel endoscope (\texttt{calib\_intrinsics\_20260922\_123120}). Because the right optical tube exhibits a $10.18^\circ$ relative roll ($\mathbf{r}_{C1,C0}=[-2.07^\circ, -0.49^\circ, +10.18^\circ]^\top$) and a $-0.518$-frame USB stream offset, triangulating the $88$-corner target under the nominal parallel CAD baseline ($b=46.50$~mm, $R=I$) yields $49.29$~px reprojection RMS, $9.51\%$ scale error, $2.088$~mm 3D grid shape RMSE, and $5.999$~mm stereo-vs-PnP 3D ADD discrepancy. Fitting moving frames without lag filtering (\texttt{synced\_m25}) biases the baseline to $55.86$~mm ($7.051$~mm ADD). Using our quasi-static calibrated extrinsics ($b=46.30$~mm) with sub-frame lag compensation reduces stereo reprojection RMS to $0.290$~px, cuts dynamic epipolar error by $42.8\%$ (from $2.573$ to $1.472$~px), recovers the $3.000$~mm grid scale within $0.18\%$, and lowers 3D shape RMSE to $0.087$~mm and stereo-vs-PnP 3D ADD to $0.355$~mm.
+
+Table~\ref{tab:stereo_rs} (Part~B) and Fig.~\ref{fig:add_real}(b) compare Frame-Level vs.\ Row-Timed Stage-II IMU compensation on the $3840\times2160$ 4K rolling-shutter sensor ($\tau_{\text{read}}=15.0$~ms, $\tau=30.0$~ms). In the fast bin $\mathcal{B}_4$ ($[2.0,10.0)$~rad/s, $n=106$), uncompensated rendering exhibits $275.47$~px median shift and $107.12$~px inter-band skew between the top ($330.37$~px) and bottom ($224.26$~px) scanline bands. Frame-level IMU compensation aligns the middle band ($34.29$~px) but leaves the top ($57.95$~px) and bottom ($53.49$~px) bands skewed by $43.25$~px. Row-timed IMU integration (Eq.~\eqref{eq:row_time}) brings the top ($35.37$~px), middle ($34.00$~px), and bottom ($33.59$~px) bands into tight agreement, collapsing fast-bin inter-band skew by $88.3\%$ to $5.08$~px ($34.60$~px overall 4K shift, equivalent to $9.98$~px at $1280\times720$) while preserving slow-turn accuracy in $\mathcal{B}_1$ ($37.80$~px vs.\ $38.01$~px).
+
+Fig.~\ref{fig:add_real}(c) evaluates consecutive $30$~fps frames from three real 4K camera + $200$~Hz IMU sessions (\texttt{gtraj\_20261002\_002134}, \texttt{003129}, and \texttt{024309}, $48$ pairs, $12$ per gyro bin), where consecutive-frame rotation error in $[2.0,10.0)$~rad/s rises from $0.434^\circ$ to $0.971^\circ$ for Pi3 and from $0.466^\circ$ to $0.627^\circ$ for Reloc3r, whereas EgoAnchorNet maintains $0.05^\circ\text{--}0.12^\circ$ camera rotation error.
 
 \section{Limitations}
 \begin{enumerate}
-    \item \emph{No optical see-through HMD:} All experiments render overlays onto 4K or stereo video frames; optical combiner calibration and pupil swim are outside our scope.
-    \item \emph{Metric scale source:} Monocular 4K millimetre error relies on a known $3.0$~mm target grid, and the $46.5$~mm stereo baseline in simulation must be replaced by per-scope stereo calibration in wet-lab trials.
-    \item \emph{Rolling shutter and soft-tissue deformation:} Our update acts at frame exposure midpoints and models rigid target increments; high-frequency rolling-shutter row skew and non-rigid tissue peristalsis require row-timed readout warps and deformable surface tracking.
+    \item \emph{No optical see-through HMD:} All experiments render overlays onto 4K or stereo video frames; optical combiner calibration and eye-tracked pupil swim are outside our scope.
+    \item \emph{Non-rigid soft-tissue deformation:} While we calibrate the metric $46.30$~mm stereo baseline and compensate 4K rolling-shutter row readout skew, our Stage-I solver models locally rigid target increments $\Delta T_{\text{obj}} \in \mathrm{SE}(3)$; high-amplitude physiological peristalsis, respiratory insufflation, and electrocautery smoke in live wet-lab surgery require coupling our static-anchor disentanglement with a low-rank deformable surface warp field.
 \end{enumerate}
 
 \section{Conclusion}
-Under simultaneous camera and target motion, viewer ego-motion drives feature loss, tracking failure, target-ROI pose error, and latency-induced overlay drift. By using IMU-guided de-rotation to isolate stationary scene anchors, solving camera ego-motion and target 3D motion in cascaded Gauss--Newton stages, and propagating only the viewer pose over the pipeline delay at display time, our method keeps 3D model ADD at $1.79\text{--}2.19$~mm and removes $75.8\%$ of high-rate AR overlay shift.
+Under simultaneous camera and target motion, viewer ego-motion drives feature loss, tracking failure, target-ROI pose error, and latency-induced overlay drift. By using IMU-guided de-rotation to isolate stationary scene anchors, solving camera ego-motion and target 3D motion in cascaded Gauss--Newton stages under calibrated $46.30$~mm stereo geometry, and propagating only the viewer pose with row-timed IMU readout compensation at display time, our method keeps 3D model ADD at $1.79\text{--}2.19$~mm, reduces 4K rolling-shutter inter-band skew by $88.3\%$, and removes $75.8\%$ of high-rate AR overlay shift.
 
 \section*{Data and Code Availability}
 The evaluation protocol, three-condition counterfactual benchmark summaries, figure generation scripts, and LaTeX manuscript sources are publicly available at \url{https://github.com/liranyang123456-commits/Viewer-Decoupled-3D-Registration}, with the dual-motion simulator and real 4K+IMU capture tools hosted at \url{https://github.com/liranyang123456-commits/EGO_Mo}.
