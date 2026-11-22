@@ -1,0 +1,33 @@
+# Exclude local drafts, figures, PDFs, and private artifacts
+*.pdf
+egomotion-registration/paper/
+egomotion-registration/figures/
+egomotion-registration/submission/
+egomotion-registration/*_*.md
+egomotion-registration/scripts/make_*.py
+egomotion-registration/scripts/export_tikz_assets.py
+
+# Exclude third-party repositories, large binary checkpoints, and archives
+egomotion-registration/repos/
+egomotion-registration/papers/
+egomotion-registration/outputs/ego_anchor_net/*.pth
+egomotion-registration/validation_pack.zip
+image-to-physics-sim/
+
+# Local tooling metadata
+.agents/
+.cursor/
+
+# Build & Python caches
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

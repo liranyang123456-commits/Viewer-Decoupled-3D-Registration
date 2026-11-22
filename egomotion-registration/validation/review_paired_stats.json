@@ -1,0 +1,134 @@
+{
+ "seed": 20261024,
+ "n_boot": 20000,
+ "validation_260": {
+  "ecd_gn_existing_minus_full_add_mm_B4": {
+   "n": 106,
+   "median_gain": 1.286,
+   "ci95": [
+    0.78,
+    1.608
+   ],
+   "wilcoxon_p": 2.2820644769724937e-11
+  },
+  "ecd_gn_existing_minus_full_px_B4": {
+   "n": 106,
+   "median_gain": 3.653,
+   "ci95": [
+    2.291,
+    5.463
+   ],
+   "wilcoxon_p": 6.622952582144903e-07
+  },
+  "ecd_gn_plus_imu_minus_full_add_mm_B4": {
+   "n": 106,
+   "median_gain": 0.842,
+   "ci95": [
+    0.533,
+    1.273
+   ],
+   "wilcoxon_p": 6.89905003377451e-11
+  },
+  "ecd_gn_plus_imu_minus_full_px_B4": {
+   "n": 106,
+   "median_gain": 1.098,
+   "ci95": [
+    0.309,
+    1.919
+   ],
+   "wilcoxon_p": 0.002851923387609032
+  },
+  "roi_gn_oracle_imu_minus_full_add_mm_B4": {
+   "n": 106,
+   "median_gain": 1.132,
+   "ci95": [
+    0.952,
+    1.587
+   ],
+   "wilcoxon_p": 1.1072974554499265e-13
+  },
+  "roi_gn_oracle_imu_minus_full_px_B4": {
+   "n": 106,
+   "median_gain": 3.607,
+   "ci95": [
+    1.809,
+    5.326
+   ],
+   "wilcoxon_p": 2.453466601532037e-07
+  },
+  "roi_gn_pred_imu_minus_full_add_mm_B4": {
+   "n": 106,
+   "median_gain": 1.248,
+   "ci95": [
+    0.953,
+    1.599
+   ],
+   "wilcoxon_p": 8.617688195162682e-14
+  },
+  "roi_gn_pred_imu_minus_full_px_B4": {
+   "n": 106,
+   "median_gain": 3.649,
+   "ci95": [
+    2.302,
+    5.606
+   ],
+   "wilcoxon_p": 7.769731709594498e-08
+  }
+ },
+ "test_40": {
+  "all_bins_add_mm": {
+   "n": 40,
+   "median_gain": 0.875,
+   "ci95": [
+    0.348,
+    1.644
+   ],
+   "wilcoxon_p": 2.2706761228619143e-05
+  },
+  "B4_add_mm": {
+   "n": 10,
+   "median_gain": 1.534,
+   "ci95": [
+    0.288,
+    4.496
+   ],
+   "wilcoxon_p": 0.048828125
+  },
+  "all_bins_target_rot_deg": {
+   "n": 40,
+   "median_gain": 0.019,
+   "ci95": [
+    -0.011,
+    0.096
+   ],
+   "wilcoxon_p": 0.049760567819248536
+  },
+  "B4_target_rot_deg": {
+   "n": 10,
+   "median_gain": 0.059,
+   "ci95": [
+    -0.046,
+    0.34
+   ],
+   "wilcoxon_p": 0.193359375
+  },
+  "all_bins_screen_px": {
+   "n": 40,
+   "median_gain": 1.474,
+   "ci95": [
+    0.127,
+    3.622
+   ],
+   "wilcoxon_p": 0.07250633211879176
+  },
+  "B4_screen_px": {
+   "n": 10,
+   "median_gain": 7.016,
+   "ci95": [
+    -11.8,
+    8.887
+   ],
+   "wilcoxon_p": 0.556640625
+  }
+ }
+}

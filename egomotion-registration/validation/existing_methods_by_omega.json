@@ -1,0 +1,323 @@
+{
+  "protocol": "64-frame gtraj, existing pose files only",
+  "methods": {
+    "pi3": {
+      "n_pairs": 189,
+      "corr": 0.301,
+      "bins": [
+        {
+          "omega_rad_s": "[0.0,0.5)",
+          "n": 18,
+          "rot_err_deg": 0.991
+        },
+        {
+          "omega_rad_s": "[0.5,1.0)",
+          "n": 13,
+          "rot_err_deg": 0.203
+        },
+        {
+          "omega_rad_s": "[1.0,2.0)",
+          "n": 24,
+          "rot_err_deg": 0.315
+        },
+        {
+          "omega_rad_s": "[2.0,10.0)",
+          "n": 134,
+          "rot_err_deg": 0.999
+        }
+      ]
+    },
+    "reloc3r": {
+      "n_pairs": 189,
+      "corr": 0.258,
+      "bins": [
+        {
+          "omega_rad_s": "[0.0,0.5)",
+          "n": 18,
+          "rot_err_deg": 1.55
+        },
+        {
+          "omega_rad_s": "[0.5,1.0)",
+          "n": 13,
+          "rot_err_deg": 1.077
+        },
+        {
+          "omega_rad_s": "[1.0,2.0)",
+          "n": 24,
+          "rot_err_deg": 0.936
+        },
+        {
+          "omega_rad_s": "[2.0,10.0)",
+          "n": 134,
+          "rot_err_deg": 1.696
+        }
+      ]
+    },
+    "mdvggt": {
+      "n_pairs": 189,
+      "corr": 0.27,
+      "bins": [
+        {
+          "omega_rad_s": "[0.0,0.5)",
+          "n": 18,
+          "rot_err_deg": 1.382
+        },
+        {
+          "omega_rad_s": "[0.5,1.0)",
+          "n": 13,
+          "rot_err_deg": 0.294
+        },
+        {
+          "omega_rad_s": "[1.0,2.0)",
+          "n": 24,
+          "rot_err_deg": 0.353
+        },
+        {
+          "omega_rad_s": "[2.0,10.0)",
+          "n": 134,
+          "rot_err_deg": 1.292
+        }
+      ]
+    }
+  },
+  "gtraj_20261002_002134": {
+    "pi3": {
+      "n_pairs": 63,
+      "corr": 0.38,
+      "bins": [
+        {
+          "omega_rad_s": "[0.0,0.5)",
+          "n": 8,
+          "rot_err_deg": 1.817
+        },
+        {
+          "omega_rad_s": "[0.5,1.0)",
+          "n": 3,
+          "rot_err_deg": 0.292
+        },
+        {
+          "omega_rad_s": "[1.0,2.0)",
+          "n": 6,
+          "rot_err_deg": 0.434
+        },
+        {
+          "omega_rad_s": "[2.0,10.0)",
+          "n": 46,
+          "rot_err_deg": 1.912
+        }
+      ]
+    },
+    "reloc3r": {
+      "n_pairs": 63,
+      "corr": 0.28,
+      "bins": [
+        {
+          "omega_rad_s": "[0.0,0.5)",
+          "n": 8,
+          "rot_err_deg": 1.943
+        },
+        {
+          "omega_rad_s": "[0.5,1.0)",
+          "n": 3,
+          "rot_err_deg": 0.979
+        },
+        {
+          "omega_rad_s": "[1.0,2.0)",
+          "n": 6,
+          "rot_err_deg": 1.126
+        },
+        {
+          "omega_rad_s": "[2.0,10.0)",
+          "n": 46,
+          "rot_err_deg": 2.08
+        }
+      ]
+    },
+    "mdvggt": {
+      "n_pairs": 63,
+      "corr": 0.381,
+      "bins": [
+        {
+          "omega_rad_s": "[0.0,0.5)",
+          "n": 8,
+          "rot_err_deg": 2.448
+        },
+        {
+          "omega_rad_s": "[0.5,1.0)",
+          "n": 3,
+          "rot_err_deg": 0.363
+        },
+        {
+          "omega_rad_s": "[1.0,2.0)",
+          "n": 6,
+          "rot_err_deg": 0.426
+        },
+        {
+          "omega_rad_s": "[2.0,10.0)",
+          "n": 46,
+          "rot_err_deg": 2.462
+        }
+      ]
+    }
+  },
+  "gtraj_20261002_003129": {
+    "pi3": {
+      "n_pairs": 63,
+      "corr": 0.198,
+      "bins": [
+        {
+          "omega_rad_s": "[0.0,0.5)",
+          "n": 2,
+          "rot_err_deg": 0.135
+        },
+        {
+          "omega_rad_s": "[0.5,1.0)",
+          "n": 4,
+          "rot_err_deg": 0.123
+        },
+        {
+          "omega_rad_s": "[1.0,2.0)",
+          "n": 8,
+          "rot_err_deg": 0.198
+        },
+        {
+          "omega_rad_s": "[2.0,10.0)",
+          "n": 49,
+          "rot_err_deg": 0.438
+        }
+      ]
+    },
+    "reloc3r": {
+      "n_pairs": 63,
+      "corr": 0.1,
+      "bins": [
+        {
+          "omega_rad_s": "[0.0,0.5)",
+          "n": 2,
+          "rot_err_deg": 0.472
+        },
+        {
+          "omega_rad_s": "[0.5,1.0)",
+          "n": 4,
+          "rot_err_deg": 0.474
+        },
+        {
+          "omega_rad_s": "[1.0,2.0)",
+          "n": 8,
+          "rot_err_deg": 1.288
+        },
+        {
+          "omega_rad_s": "[2.0,10.0)",
+          "n": 49,
+          "rot_err_deg": 1.453
+        }
+      ]
+    },
+    "mdvggt": {
+      "n_pairs": 63,
+      "corr": 0.13,
+      "bins": [
+        {
+          "omega_rad_s": "[0.0,0.5)",
+          "n": 2,
+          "rot_err_deg": 0.417
+        },
+        {
+          "omega_rad_s": "[0.5,1.0)",
+          "n": 4,
+          "rot_err_deg": 0.265
+        },
+        {
+          "omega_rad_s": "[1.0,2.0)",
+          "n": 8,
+          "rot_err_deg": 0.492
+        },
+        {
+          "omega_rad_s": "[2.0,10.0)",
+          "n": 49,
+          "rot_err_deg": 0.785
+        }
+      ]
+    }
+  },
+  "gtraj_20261002_024309": {
+    "pi3": {
+      "n_pairs": 63,
+      "corr": 0.178,
+      "bins": [
+        {
+          "omega_rad_s": "[0.0,0.5)",
+          "n": 8,
+          "rot_err_deg": 0.379
+        },
+        {
+          "omega_rad_s": "[0.5,1.0)",
+          "n": 6,
+          "rot_err_deg": 0.213
+        },
+        {
+          "omega_rad_s": "[1.0,2.0)",
+          "n": 10,
+          "rot_err_deg": 0.336
+        },
+        {
+          "omega_rad_s": "[2.0,10.0)",
+          "n": 39,
+          "rot_err_deg": 0.626
+        }
+      ]
+    },
+    "reloc3r": {
+      "n_pairs": 63,
+      "corr": 0.309,
+      "bins": [
+        {
+          "omega_rad_s": "[0.0,0.5)",
+          "n": 8,
+          "rot_err_deg": 1.427
+        },
+        {
+          "omega_rad_s": "[0.5,1.0)",
+          "n": 6,
+          "rot_err_deg": 1.528
+        },
+        {
+          "omega_rad_s": "[1.0,2.0)",
+          "n": 10,
+          "rot_err_deg": 0.541
+        },
+        {
+          "omega_rad_s": "[2.0,10.0)",
+          "n": 39,
+          "rot_err_deg": 1.549
+        }
+      ]
+    },
+    "mdvggt": {
+      "n_pairs": 63,
+      "corr": -0.007,
+      "bins": [
+        {
+          "omega_rad_s": "[0.0,0.5)",
+          "n": 8,
+          "rot_err_deg": 0.558
+        },
+        {
+          "omega_rad_s": "[0.5,1.0)",
+          "n": 6,
+          "rot_err_deg": 0.279
+        },
+        {
+          "omega_rad_s": "[1.0,2.0)",
+          "n": 10,
+          "rot_err_deg": 0.199
+        },
+        {
+          "omega_rad_s": "[2.0,10.0)",
+          "n": 39,
+          "rot_err_deg": 0.55
+        }
+      ]
+    }
+  }
+}

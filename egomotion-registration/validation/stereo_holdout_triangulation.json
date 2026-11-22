@@ -1,0 +1,91 @@
+{
+  "session": "calib_intrinsics_20260922_123120",
+  "metric": "time-interleaved 4-fold refit; test pairs scored by triangulation against the 3 mm grid",
+  "modes": [
+    {
+      "mode": "quasi_static_4px_interleaved",
+      "motion_px": 4.0,
+      "pairs": 41,
+      "selection": {
+        "pairs": 41,
+        "motion_px_max": 4.0,
+        "right_offset_frames": -0.5175128103963131
+      },
+      "full_fit_rms_px": 0.5751,
+      "full_baseline_mm": 46.303,
+      "full_t_mm": [
+        -46.088,
+        3.728,
+        -2.446
+      ],
+      "full_r_deg": [
+        -2.068,
+        -0.493,
+        10.177
+      ],
+      "folds": [
+        {
+          "fold": 0,
+          "train": 30,
+          "test": 11,
+          "fit_rms_px": 0.6193,
+          "holdout_pnp_translation_rmse_mm": 2.356,
+          "holdout_epipolar_p50_px": 0.383
+        },
+        {
+          "fold": 1,
+          "train": 31,
+          "test": 10,
+          "fit_rms_px": 0.6154,
+          "holdout_pnp_translation_rmse_mm": 2.336,
+          "holdout_epipolar_p50_px": 0.383
+        },
+        {
+          "fold": 2,
+          "train": 31,
+          "test": 10,
+          "fit_rms_px": 0.6108,
+          "holdout_pnp_translation_rmse_mm": 3.256,
+          "holdout_epipolar_p50_px": 0.412
+        },
+        {
+          "fold": 3,
+          "train": 31,
+          "test": 10,
+          "fit_rms_px": 0.41,
+          "holdout_pnp_translation_rmse_mm": 6.941,
+          "holdout_epipolar_p50_px": 1.277
+        }
+      ],
+      "holdout_shape_rmse_mm": {
+        "n": 41,
+        "median": 0.0878,
+        "iqr": 0.057,
+        "mean": 0.1158,
+        "p95": 0.2317
+      },
+      "holdout_scale_err_pct": {
+        "n": 41,
+        "median": 0.1782,
+        "iqr": 0.1434,
+        "mean": 0.2658,
+        "p95": 0.883
+      },
+      "holdout_reproj_rms_px": {
+        "n": 41,
+        "median": 0.2938,
+        "iqr": 0.1103,
+        "mean": 0.4258,
+        "p95": 1.1012
+      },
+      "holdout_pnp_translation_mm": {
+        "n": 41,
+        "median": 2.3596,
+        "iqr": 1.0298,
+        "mean": 3.4938,
+        "p95": 9.0569
+      },
+      "holdout_pnp_translation_rmse_mm": 4.142
+    }
+  ]
+}
