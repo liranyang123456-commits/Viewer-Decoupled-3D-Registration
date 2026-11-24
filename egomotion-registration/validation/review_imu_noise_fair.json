@@ -1,0 +1,36 @@
+{
+  "b4_noisy_imu_comparison": {
+    "clean": {
+      "n": 106,
+      "ours_add_med": 1.902,
+      "ours_px_med": 9.972,
+      "ecdi_add_med": 3.281,
+      "ecdi_px_med": 11.0
+    },
+    "noise_1deg": {
+      "n": 106,
+      "ours_add_med": 1.936,
+      "ours_px_med": 10.406,
+      "ecdi_add_med": 3.212,
+      "ecdi_px_med": 10.661
+    },
+    "extr_10deg": {
+      "n": 106,
+      "ours_add_med": 1.973,
+      "ours_px_med": 9.941,
+      "ecdi_add_med": 3.198,
+      "ecdi_px_med": 11.314
+    },
+    "scale_p20": {
+      "n": 106,
+      "ours_add_med": 2.061,
+      "ours_px_med": 12.583,
+      "ecdi_add_med": 3.284,
+      "ecdi_px_med": 11.536
+    }
+  },
+  "nov9_pnp_reproj_px": {
+    "median": 0.055,
+    "p95": 0.137
+  }
+}

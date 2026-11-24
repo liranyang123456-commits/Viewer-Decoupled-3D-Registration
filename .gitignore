@@ -14,6 +14,15 @@ egomotion-registration/outputs/ego_anchor_net/*.pth
 egomotion-registration/validation_pack.zip
 image-to-physics-sim/
 
+# Superseded legacy pre-revision evaluation files (archived locally only)
+egomotion-registration/outputs/egomotion_free_registration.json
+egomotion-registration/outputs/overlay_error_sweep.csv
+egomotion-registration/scripts/egomotion_overlay_error.py
+egomotion-registration/validation/consecutive_pairs_by_omega.json
+egomotion-registration/validation/existing_methods_by_omega.json
+egomotion-registration/validation/methods_both_moving.json
+egomotion-registration/validation/multiseq_real_endoscope.json
+
 # Local tooling metadata
 .agents/
 .cursor/
