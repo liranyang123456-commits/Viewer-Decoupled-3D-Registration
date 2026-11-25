@@ -23,6 +23,7 @@ Outputs:
 """
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
@@ -38,19 +39,21 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 from scipy.stats import wilcoxon
 
-sys.path.insert(0, r"E:\EGO_Mo")
-sys.path.insert(0, r"D:\ego_motiion_Camera")
-sys.path.insert(0, r"D:\ISMAR2026\egomotion-registration\scripts")
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+_SIM_DEFAULT = os.environ.get("ENDOSIM_ROOT", r"D:\ego_motiion_Camera")
+if Path(_SIM_DEFAULT).exists():
+    sys.path.insert(0, _SIM_DEFAULT)
 
 import eval_real_viewer_overlay as E  # noqa: E402
-from tools.calibrate_cam_imu_subms import fit_subms_delay_and_rci  # noqa: E402
+from subms_imu_calib import fit_subms_delay_and_rci, integrate_gyro_so3  # noqa: E402
 from endosim.lite.ego_anchor_net import EgoAnchorNet  # noqa: E402
 from endosim.lite.egolite import so3_log  # noqa: E402
 
-DATA = Path(r"E:\EGO_Mo\datasets")
-ROOT = Path(r"D:\ISMAR2026\egomotion-registration")
+DATA = Path(os.environ.get("EGO_MO_DATA", r"E:\EGO_Mo\datasets"))
 CKPT_BASE = ROOT / "outputs" / "ego_anchor_net" / "ego_anchor_net.pth"
 OUT_JSON = ROOT / "validation" / "existing_real_recalibrated.json"
+OUT_BUNDLE_NPZ = ROOT / "validation" / "real_endoscope_10sess_pnp_imu.npz"
 
 SEP_STATIC_BOARD_SESS = [
     "traj_20260923_015507", "traj_20260923_015629", "traj_20260923_015918",
@@ -100,24 +103,6 @@ def board_corners_centered_m() -> np.ndarray:
     ], dtype=np.float64)
 
 
-def integrate_gyro_so3(t_imu: np.ndarray, w_imu: np.ndarray, bias: np.ndarray,
-                       Rci: np.ndarray, t0: float, t1: float) -> np.ndarray:
-    i0, i1 = int(np.searchsorted(t_imu, t0)), int(np.searchsorted(t_imu, t1))
-    if i1 <= i0:
-        idx = int(np.clip(i0, 0, len(t_imu) - 1))
-        wc = Rci @ (w_imu[idx] - bias)
-        return Rotation.from_rotvec(wc * max(t1 - t0, 0.0)).as_matrix()
-    ts = t_imu[i0:i1]
-    wc = (w_imu[i0:i1] - bias[None, :]) @ Rci.T
-    dts = np.diff(ts, append=t1)
-    dts[0] += ts[0] - t0
-    R = np.eye(3)
-    for wi, dti in zip(wc, dts):
-        if dti > 0:
-            R = R @ Rotation.from_rotvec(wi * dti).as_matrix()
-    return R
-
-
 def cluster_boot_ci(rows: list[dict], ka: str, kb: str, n_boot: int = 2000) -> list[float]:
     rng = np.random.default_rng(42)
     cl = np.array([r["sess"] for r in rows])
@@ -137,11 +122,17 @@ def cluster_boot_ci(rows: list[dict], ka: str, kb: str, n_boot: int = 2000) -> l
 def run_stage2_recalibrated() -> dict:
     """Evaluates Stage II real image-space overlay on the 10 Sept 23-26 stereo
     endoscope sessions using strict 2-fold out-of-sample sub-ms calibration +
-    lever-arm-free camera-frame translational extrapolation."""
+    lever-arm-free camera-frame translational extrapolation, and exports a
+    compact PnP+IMU trajectory bundle for standalone public reproduction."""
     K_sep, dist_sep = E.load_camera()
     Xb = centered_board_m()
     rows = []
     calib_summary = []
+    bundle_dict: dict[str, np.ndarray] = {
+        "K_sep": K_sep,
+        "dist_sep": dist_sep,
+        "sessions": np.array(SEP_STATIC_BOARD_SESS),
+    }
 
     for sess in SEP_STATIC_BOARD_SESS:
         z = np.load(DATA / "pose_gt_raw" / f"{sess}.npz")
@@ -153,6 +144,12 @@ def run_stage2_recalibrated() -> dict:
         if len(t_raw) < 60:
             continue
         t_imu, w_imu = E.load_gyro(sess)
+        bundle_dict[f"{sess}_t"] = t_raw
+        bundle_dict[f"{sess}_R"] = R.astype(np.float32)
+        bundle_dict[f"{sess}_p"] = p.astype(np.float32)
+        bundle_dict[f"{sess}_t_imu"] = t_imu
+        bundle_dict[f"{sess}_w_imu"] = w_imu.astype(np.float32)
+        bundle_dict[f"{sess}_legacy_delay_s"] = np.array([old_delay], dtype=np.float64)
         mid = len(t_raw) // 2
         f0 = fit_subms_delay_and_rci(t_raw[:mid], R[:mid], t_imu, w_imu)
         f1 = fit_subms_delay_and_rci(t_raw[mid:], R[mid:], t_imu, w_imu)
@@ -255,6 +252,7 @@ def run_stage2_recalibrated() -> dict:
             rec["coupled_minus_viewer_se3_ci95"] = cluster_boot_ci(sel, "coupled_px", "viewer_decoupled_se3_px")
             rec["delayed_minus_viewer_gyro_ci95"] = cluster_boot_ci(sel, "delayed_px", "viewer_gyro_px")
         out["strata"][k_sub] = rec
+    np.savez_compressed(OUT_BUNDLE_NPZ, **bundle_dict)
     return out
 
 
@@ -287,14 +285,18 @@ def extract_recalibrated_stage1_pairs(sess_list: list[tuple[str, str]], rci_sep:
 
         if rig == "sep":
             if sess.startswith("gtraj_"):
-                # Use dedicated Sept-26 rigid calibration delay (~38 ms) + calm gyro bias
-                dt_s = 0.038
+                # Use dedicated Sept-26 rigid calibration delay (35.7 ms) + calm gyro bias
+                dt_s = 0.0357
                 Rci = rci_sep
                 calm = np.linalg.norm(w_imu, axis=1) < np.radians(2.5)
                 bias = w_imu[calm].mean(axis=0) if int(calm.sum()) >= 20 else np.zeros(3)
+                usable_eval = usable
             else:
-                # Fit delay & Rci on static-board session (or first 250 usable frames)
-                u_fit = usable[:min(len(usable), 350)]
+                # Strictly disjoint temporal split: calibrate per-launch UVC offset on first 40%,
+                # extract Stage-I evaluation/adaptation pairs strictly from remaining 60%!
+                n_cal = max(80, int(len(usable) * 0.40))
+                u_fit = usable[:n_cal]
+                usable_eval = usable[n_cal:]
                 f = fit_subms_delay_and_rci(t_raw[u_fit], R_all[u_fit], t_imu, w_imu)
                 dt_s = float(f["delay_subms_s"])
                 Rci = np.asarray(f["R_ci"], np.float64) if f["omega_norm_corr"] >= 0.5 else rci_sep
@@ -303,15 +305,16 @@ def extract_recalibrated_stage1_pairs(sess_list: list[tuple[str, str]], rci_sep:
             dt_s = dt_nov
             Rci = rci_nov
             bias = bias_nov
+            usable_eval = usable
 
         t_all = t_raw - dt_s
         cands = []
-        # Include consecutive AND 2-step (~65-95ms) pairs to test large rotational optical flow (up to 6 deg / 110 px!)
-        for ii in range(len(usable) - 1):
+        # Include consecutive AND 2-step (~65-95ms) pairs to test large rotational optical flow
+        for ii in range(len(usable_eval) - 1):
             for step_u in (1, 2):
-                if ii + step_u >= len(usable):
+                if ii + step_u >= len(usable_eval):
                     continue
-                a, b = int(usable[ii]), int(usable[ii + step_u])
+                a, b = int(usable_eval[ii]), int(usable_eval[ii + step_u])
                 if b - a > 4:
                     continue
                 dt = float(t_all[b] - t_all[a])
@@ -411,6 +414,8 @@ def run_stage1_recalibrated() -> dict:
                                    ("EgoAnchorNet_NoIMU", "no_imu_prior", False),
                                    ("ECD_GN_IMU", "no_anchor_gate", True),
                                    ("ECD_GN", "no_anchor_gate", False)]:
+        torch.manual_seed(100)
+        torch.cuda.manual_seed_all(100)
         m = EgoAnchorNet(pretrained=False, refine_iters=2).to(device)
         m.load_state_dict(torch.load(CKPT_BASE, map_location=device, weights_only=False)["model"])
         for p in m.flow.parameters():
@@ -514,6 +519,13 @@ def run_stage1_recalibrated() -> dict:
 
 
 def main() -> None:
+    global DATA
+    ap = argparse.ArgumentParser(description="Recalibrated real endoscope & dual-motion evaluation.")
+    ap.add_argument("--data-root", type=Path, default=DATA, help="Path to EGO_Mo/datasets directory.")
+    args = ap.parse_args()
+    DATA = args.data_root
+    E.DATA = DATA
+
     t0 = time.perf_counter()
     print("=== Running Part 1: Stage II Recalibrated Real Image-Space Overlay ===", flush=True)
     s2 = run_stage2_recalibrated()

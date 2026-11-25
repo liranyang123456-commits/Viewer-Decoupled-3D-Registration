@@ -1,7 +1,7 @@
 {
   "protocol": {
     "description": "Non-planar 3D model registration & 5-frame 30 Hz chained 6DoF model tracking benchmark (zero planar checkerboards).",
-    "camera": "Device-B 1280x720 (fx=1282.13, fy=1282.99, cx=610.59, cy=358.19), 30 Hz + coaxial Phong specularities",
+    "camera": "Benchtop/SCARED 1280x720 (fx=1282.13, fy=1282.99, cx=610.59, cy=358.19), 30 Hz + coaxial Phong specularities",
     "imu": "Simulated 200 Hz MEMS gyro with white noise (0.015 rad/s), turn-on bias (0.012 rad/s), and 0.35 deg extrinsic residual",
     "train_split": "240 pairs on BOP {1,2,4,6,10,11} + procedural 3D nodules in train cavities + SCARED train textures [0..5]",
     "test_split": "120 unseen 5-frame clips (30/bin across B1..B4, 480 steps) on strictly unseen 3D targets {BOP_05, BOP_08, BOP_09, 3D_Lesion_Grasper} (42 mm nominal diameter) in unseen C3VD/folded cavities + held-out SCARED textures [6..11]",

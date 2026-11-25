@@ -32,6 +32,7 @@ Outputs:
 """
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import os
@@ -48,7 +49,10 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 from scipy.stats import wilcoxon
 
-sys.path.insert(0, r"D:\ego_motiion_Camera")
+ROOT = Path(__file__).resolve().parent.parent
+_SIM_DEFAULT = os.environ.get("ENDOSIM_ROOT", r"D:\ego_motiion_Camera")
+if Path(_SIM_DEFAULT).exists():
+    sys.path.insert(0, _SIM_DEFAULT)
 
 from endosim.lite.ego_anchor_net import EgoAnchorNet
 from endosim.lite.egolite import se3_exp as torch_se3_exp, skew as torch_skew, so3_log
@@ -72,10 +76,9 @@ from endosim.scene.objects import (
 from endosim.scene.organ import ORGAN_MESHES, OrganMeshScene, available_organs
 from endosim.scene.tissue import TissueTunnel
 
-ROOT = Path(r"D:\ISMAR2026\egomotion-registration")
 CKPT_BASE = ROOT / "outputs" / "ego_anchor_net" / "ego_anchor_net.pth"
 OUT_JSON = ROOT / "validation" / "nonplanar_3d_model_benchmark.json"
-SCARED_ROOT = Path(r"E:\World_Agent_Enoscopy\datasets\SCARED")
+SCARED_ROOT = Path(os.environ.get("SCARED_ROOT", r"E:\World_Agent_Enoscopy\datasets\SCARED"))
 
 W_HD, H_HD = 1280, 720
 W_NET, H_NET = 320, 256
@@ -1375,7 +1378,7 @@ def main() -> None:
     report = {
         "protocol": {
             "description": "Non-planar 3D model registration & 5-frame 30 Hz chained 6DoF model tracking benchmark (zero planar checkerboards).",
-            "camera": "Device-B 1280x720 (fx=1282.13, fy=1282.99, cx=610.59, cy=358.19), 30 Hz + coaxial Phong specularities",
+            "camera": "Benchtop/SCARED 1280x720 (fx=1282.13, fy=1282.99, cx=610.59, cy=358.19), 30 Hz + coaxial Phong specularities",
             "imu": "Simulated 200 Hz MEMS gyro with white noise (0.015 rad/s), turn-on bias (0.012 rad/s), and 0.35 deg extrinsic residual",
             "train_split": "240 pairs on BOP {1,2,4,6,10,11} + procedural 3D nodules in train cavities + SCARED train textures [0..5]",
             "test_split": "120 unseen 5-frame clips (30/bin across B1..B4, 480 steps) on strictly unseen 3D targets {BOP_05, BOP_08, BOP_09, 3D_Lesion_Grasper} (42 mm nominal diameter) in unseen C3VD/folded cavities + held-out SCARED textures [6..11]",
